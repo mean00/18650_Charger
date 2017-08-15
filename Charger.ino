@@ -19,12 +19,8 @@ Charger     *charger;
  */
 void setup(void) 
 {
-
-  screen.setup();
-  
-  charger= new Charger(&screen,6,A2,2,4); 
-  
-  
+  screen.setup();  
+  charger= new Charger(&screen,6,A2,2,4);     
 }
 /**
  */

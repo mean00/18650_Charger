@@ -6,6 +6,7 @@ Components short list :
 * Nx TP 4056
 * N* Shottky diodes
 * N* P Mosfet
+* N* INA219
 * 1 arduino
 * 1 ST7735 color screen
 * 1x level shifter for the screen (5 entries needed)
