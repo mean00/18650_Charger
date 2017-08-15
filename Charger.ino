@@ -20,7 +20,7 @@ Charger     *charger;
 void setup(void) 
 {
   screen.setup();  
-  charger= new Charger(&screen,6,A2,2,4);     
+  charger= new Charger(0,&screen,6,A2,2,4);     
 }
 /**
  */

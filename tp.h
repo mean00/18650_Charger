@@ -1,8 +1,12 @@
-
+/**
+ 
+ */
 #pragma once
 #include "st7xx_screen.h"
 #include "ad_timer.h"
 
+// From time to time, we stop the charge to get the battery voltage
+// So we stop for X second every Y seconds
 
 #define READ_DELAY      5000 // ms when we cut off current and measure the battery
 #define POLLING_PERIOD  (5*60) // Every 5mn s
@@ -15,11 +19,21 @@ enum State
     STATE_ERROR
 };
 
+/**
+ * \class Charger
+ * \brief Small class than handles one chager
+ * @param dex  : Index of that charger (0,1,...)
+ * @param sc   : Screen , common
+ * @param inChargePin     : Command pin to enable charge, drive mostfet gate
+ * @param inVbaPin        : Analog pin to measure vbat, backup for INA when charge is off
+ * @param intChargingPin  : Input pin, active low to notify the TP4056 is charging 
+ * @param inChargeDone    : Input pin, active low to notify the TP4056 charge is done
+ */
 
 class Charger
 {
 public:
-             Charger(ST77_Screen *sc, int inChargePin,int inVbaPin, int intCharginfPin, int inChargeDone);
+             Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin, int intChargingPin, int inChargeDone);
         void run(void);
 protected:
         
@@ -31,8 +45,11 @@ protected:
         int vbatPin         ;     // a2 : vBAT
         int chargingLedPin  ;      // Active Low
         int chargeDonePin   ;      // Active Low                
-        void enableCharge(bool onoff);
-        
+        void    enableCharge(bool onoff);
+        int     voltageToPercent(int volt);
         float _batteryCurrentVoltage;
+        int   index;
 
 };
+
+// EOF
