@@ -29,7 +29,9 @@ public:
                     
                     
 protected:  
-  Adafruit_ST7735  *ptr;
+    int               width;
+    int               height;
+    Adafruit_ST7735  *ptr;
   
 };
 

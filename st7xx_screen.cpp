@@ -53,9 +53,17 @@ void ST77_Screen::setup(void)
 {
    ptr->initR(INITR_BLACKTAB);   // initialize a ST7735S chip, black tab
    blank();
+   
+   width=(int)ptr->width();
+   height=(int)(ptr->height()/4);
+   
+   
    ptr->setTextColor(ST7735_WHITE);
    ptr->setTextSize(0);
    ptr->println("CHARGER v0.1");
+   ptr->println(width);
+   ptr->println(height);
+   delay(100);
 }
 
 void ST77_Screen::blank(void)
@@ -74,20 +82,25 @@ void ST77_Screen::updateStateCharging(int index, int percent, int amps,int mvolt
     int color=ST7735_BLUE;
     const char *text="Charging";
     ptr->setTextColor(ST7735_BLACK);
-    int frontier=((WIDTH-4)*percent)/100;
     
-    ptr->fillRoundRect(2, HEIGHT*index, frontier, HEIGHT,5,ST7735_GREEN);
-    ptr->fillRoundRect(2+frontier, HEIGHT*index, WIDTH-4, HEIGHT,5,ST7735_BLUE);    
+    int frontier=((width)*percent)/100;
+    
+    ptr->fillRoundRect(1, height*index, frontier, height-1,3,ST7735_GREEN );
+    ptr->fillRoundRect(frontier+1, height*index, width, height-1,3,ST7735_BLUE );    
 
     
-    print(10,HEIGHT*index+HEIGHT/2-4,text);
+    print(10,height*index+height/2-4,text);
     
-    ptr->setCursor(WIDTH/2+10,HEIGHT*index+10);
+    ptr->setCursor(width/2+10,height*index+10);
     ptr->print(amps);
     ptr->print(" mA");
-    ptr->setCursor(WIDTH/2+10,HEIGHT*index+20);
+    ptr->setCursor(width/2+10,height*index+20);
     ptr->print(mvolt);
     ptr->print(" mV");
+#if 1    
+    ptr->setCursor(width/2+10,height*index+30);
+    ptr->print(percent);
+#endif
 }
 /**
  */

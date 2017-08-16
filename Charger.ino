@@ -30,10 +30,9 @@ void setup(void)
  */
 void loop(void) 
 {
-  screen.blank();
+  //screen.blank();
   charger->run();  
   delay(500);
- 
 }
 // EOF
 

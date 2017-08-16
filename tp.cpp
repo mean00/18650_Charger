@@ -57,7 +57,7 @@ int     Charger::voltageToPercent(int volt)
     int mx=sizeof(conversionTable)/sizeof(voltageValue);
     if(volt > conversionTable[0].voltage) return 100;
     if(volt < conversionTable[mx-1].voltage) return 0;
-    for(int i=1;i<mx;i++)
+    for(int i=mx-1;i>=0;i--)
     {
         if(volt<conversionTable[i].voltage)
             return conversionTable[i].percent;
@@ -82,7 +82,9 @@ void Charger::enableCharge(bool onoff)
  Charger::Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin, int intCharginfPin, int inChargeDone) :  timer(POLLING_PERIOD)
  {
      
-     index=dex;
+    index=dex;
+    
+    lowCurrentCounter=0;
      
     sensor219.begin();
     screen=sc;
@@ -134,6 +136,7 @@ void Charger::enableCharge(bool onoff)
         screenState=ScreenState_Idle;
         if(batVoltage>2300)
         {
+            lowCurrentCounter=0;
             state=STATE_CHARGING;    
              _batteryCurrentVoltage=batVoltage;
             enableCharge(true);
@@ -143,6 +146,30 @@ void Charger::enableCharge(bool onoff)
     case STATE_CHARGING:
         stateName="CHARGING";
         screenState=ScreenState_Charging;
+        if(current<2) // maybe disconnect or charge done
+        {
+            lowCurrentCounter++;
+            if(lowCurrentCounter>3)
+            {
+                enableCharge(false);
+                delay(500);
+                _batteryCurrentVoltage = 1000.*sensor219.getBusVoltage_V();
+                if(_batteryCurrentVoltage>4180) // done
+                {
+                    screenState=ScreenState_Charged;
+                    state=STATE_CHARGED;
+                }else
+                {
+                    screenState=ScreenState_Idle;
+                    state=STATE_IDLE;
+                }
+                screen->updateState(index,screenState);
+                return;
+            }
+        }else
+        {
+            lowCurrentCounter=0;
+        }
         if(timer.rdv())
         {
             // Switch off mostfet so we can get a reading

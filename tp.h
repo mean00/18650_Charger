@@ -49,6 +49,8 @@ protected:
         int     voltageToPercent(int volt);
         float _batteryCurrentVoltage;
         int   index;
+        int   lowCurrentCounter;
+        
 
 };
 
