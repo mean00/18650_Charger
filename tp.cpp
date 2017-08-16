@@ -125,19 +125,24 @@ void Charger::enableCharge(bool onoff)
   int charged=digitalRead(chargeDonePin);
 
   const char *stateName="xxx";
+  ScreenState screenState;
   switch(state)
   {
     case STATE_IDLE:
         stateName="IDLE";
+        enableCharge(false);
+        screenState=ScreenState_Idle;
         if(batVoltage>2300)
         {
-            state=STATE_CHARGING;            
+            state=STATE_CHARGING;    
+             _batteryCurrentVoltage=batVoltage;
             enableCharge(true);
             timer.reset();
         }
         break;
     case STATE_CHARGING:
         stateName="CHARGING";
+        screenState=ScreenState_Charging;
         if(timer.rdv())
         {
             // Switch off mostfet so we can get a reading
@@ -149,24 +154,20 @@ void Charger::enableCharge(bool onoff)
         }
         break;
     case STATE_CHARGED:
+        screenState=ScreenState_Charged;
+        enableCharge(false);
+        break;
     case STATE_ERROR: 
-        stateName="Done";
+        screenState=ScreenState_Error;
         enableCharge(false);
         break;        
   }
+  if(state!=STATE_CHARGING)
+      screen->updateState(index,screenState);
+  else
+  {
+      screen->updateStateCharging(index,voltageToPercent(_batteryCurrentVoltage),(int)current,_batteryCurrentVoltage);
+  }
   
-  
-  char buffer[60],buffer2[20],buffer3[20];
-  
-  screen->print(8,stateName);
-  prettyPrint(buffer2,volt);
-  prettyPrint(buffer3,batVoltage);
-  sprintf(buffer,"A:%sv-B:%sv",buffer2,buffer3);
-  screen->print(28,buffer);
-  sprintf(buffer,"%d: %d-%d",(int)(current),charging,charged);
-  screen->print(56,buffer);
-  
-  prettyPrint(buffer2,_batteryCurrentVoltage);
-  screen->print(70,buffer2);
-     
+ 
  }

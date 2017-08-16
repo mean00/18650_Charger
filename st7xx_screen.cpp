@@ -62,14 +62,69 @@ void ST77_Screen::blank(void)
 {
    ptr->fillScreen(ST7735_BLACK);
 }
-void ST77_Screen::print(int y, const char *s)
+void ST77_Screen::print(int x, int y, const char *s)
 {
-  ptr->setCursor(0, y);  
+  ptr->setCursor(x, y);  
   ptr->setTextWrap(true);
   ptr->print(s);
-
 }
 
+void ST77_Screen::updateStateCharging(int index, int percent, int amps,int mvolt)
+{
+    int color=ST7735_BLUE;
+    const char *text="Charging";
+    ptr->setTextColor(ST7735_BLACK);
+    int frontier=((WIDTH-4)*percent)/100;
+    
+    ptr->fillRoundRect(2, HEIGHT*index, frontier, HEIGHT,5,ST7735_GREEN);
+    ptr->fillRoundRect(2+frontier, HEIGHT*index, WIDTH-4, HEIGHT,5,ST7735_BLUE);    
+
+    
+    print(10,HEIGHT*index+HEIGHT/2-4,text);
+    
+    ptr->setCursor(WIDTH/2+10,HEIGHT*index+10);
+    ptr->print(amps);
+    ptr->print(" mA");
+    ptr->setCursor(WIDTH/2+10,HEIGHT*index+20);
+    ptr->print(mvolt);
+    ptr->print(" mV");
+}
+/**
+ */
+void ST77_Screen::updateState(int index,ScreenState s)
+{
+    int color;
+    const char *text;
+    
+    ptr->setTextColor(ST7735_BLACK);
+    switch(s)
+    {        
+        case ScreenState_Idle:
+            color=ST7735_WHITE;
+            text="Idle";
+            break;
+        default:
+        case  ScreenState_Error:
+            color=ST7735_RED;
+            text="Error";
+            break;
+        case ScreenState_Charging:
+            color=ST7735_BLUE;
+            text="Charging";
+            break;
+        case ScreenState_Charged:   
+            color=ST7735_GREEN;
+            text="Charged";
+            break;
+        case ScreenState_Waiting:
+            color=ST7735_YELLOW;
+            text="Waiting";
+            break;          
+    }
+    ptr->fillRoundRect(2, HEIGHT*index, WIDTH-4, HEIGHT,5,color);
+    print(WIDTH/2-20,HEIGHT*index+HEIGHT/2-10,text);
+    return ;
+}
 #if 0
 
 float p = 3.1415926;
