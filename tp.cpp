@@ -36,8 +36,11 @@ public:
 voltageValue conversionTable[]=
 {
     {4200,100},
+    {4150, 95},
     {4100, 90},
+    {4050, 85},
     {4000, 80},
+    {3950, 75},
     {3900, 70},
     {3800, 60},
     {3700, 50},
@@ -138,9 +141,10 @@ void Charger::enableCharge(bool onoff)
         {
             lowCurrentCounter=0;
             state=STATE_CHARGING;    
-             _batteryCurrentVoltage=batVoltage;
+             _batteryCurrentVoltage=volt;
             enableCharge(true);
-            timer.reset();
+            delay(100);
+            
         }
         break;
     case STATE_CHARGING:
