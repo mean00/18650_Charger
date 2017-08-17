@@ -156,7 +156,7 @@ void Charger::enableCharge(bool onoff)
             if(lowCurrentCounter>3)
             {
                 enableCharge(false);
-                delay(500);
+                delay(300);
                 _batteryCurrentVoltage = 1000.*sensor219.getBusVoltage_V();
                 if(_batteryCurrentVoltage>4180) // done
                 {
@@ -164,8 +164,12 @@ void Charger::enableCharge(bool onoff)
                     state=STATE_CHARGED;
                 }else
                 {
-                    screenState=ScreenState_Idle;
-                    state=STATE_IDLE;
+                    // Send a reset pulse
+                   enableCharge(true);
+                   delay(100);
+                   enableCharge(false);
+                   screenState=ScreenState_Idle;
+                   state=STATE_IDLE;
                 }
                 screen->updateState(index,screenState);
                 return;
