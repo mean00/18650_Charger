@@ -82,7 +82,7 @@ void Charger::enableCharge(bool onoff)
 /**
  * 
  */
- Charger::Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin, int intCharginfPin, int inChargeDone) :  timer(POLLING_PERIOD)
+ Charger::Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin) :  timer(POLLING_PERIOD)
  {
      
     index=dex;
@@ -94,14 +94,10 @@ void Charger::enableCharge(bool onoff)
 
     chargeCommandPin = inChargePin;      // D6 : Charge control, active Low
     vbatPin          = inVbaPin;     // a2 : vBAT
-    chargingLedPin   = intCharginfPin;      // Active Low
-    chargeDonePin    = inChargeDone;      // Active Low
 
     state=STATE_IDLE;
     pinMode(vbatPin,          INPUT);
     pinMode(chargeCommandPin, OUTPUT); // MOSFET command as output
-    pinMode(chargingLedPin,   INPUT);  // "Charging" Led, dont let it be pullup now it will power up the TP4056
-    pinMode(chargeDonePin,    INPUT);  // Same
 
     enableCharge(true); // send a charge pulse to reset the DW01
     delay(100);
@@ -126,8 +122,6 @@ void Charger::enableCharge(bool onoff)
   int batVoltage=(int)rawBatVoltage;
   
   int volt=(int)(busVoltage*1000.);
-  int charging=digitalRead(chargingLedPin);
-  int charged=digitalRead(chargeDonePin);
 
   const char *stateName="xxx";
   ScreenState screenState;
@@ -150,7 +144,7 @@ void Charger::enableCharge(bool onoff)
     case STATE_CHARGING:
         stateName="CHARGING";
         screenState=ScreenState_Charging;
-        if(current<2) // maybe disconnect or charge done
+        if(current<9) // maybe disconnect or charge done
         {
             lowCurrentCounter++;
             if(lowCurrentCounter>3)
@@ -158,7 +152,7 @@ void Charger::enableCharge(bool onoff)
                 enableCharge(false);
                 delay(300);
                 _batteryCurrentVoltage = 1000.*sensor219.getBusVoltage_V();
-                if(_batteryCurrentVoltage>4180) // done
+                if(_batteryCurrentVoltage>4100) // done
                 {
                     screenState=ScreenState_Charged;
                     state=STATE_CHARGED;

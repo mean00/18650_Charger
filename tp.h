@@ -33,7 +33,7 @@ enum State
 class Charger
 {
 public:
-             Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin, int intChargingPin, int inChargeDone);
+             Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin);
         void run(void);
 protected:
         
@@ -43,8 +43,6 @@ protected:
         Timer               timer;
         int chargeCommandPin;      // D6 : Charge control, active Low
         int vbatPin         ;     // a2 : vBAT
-        int chargingLedPin  ;      // Active Low
-        int chargeDonePin   ;      // Active Low                
         void    enableCharge(bool onoff);
         int     voltageToPercent(int volt);
         float _batteryCurrentVoltage;

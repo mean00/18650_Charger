@@ -65,7 +65,23 @@ void ST77_Screen::setup(void)
    ptr->println(height);
    delay(100);
 }
-
+/**
+ * 
+ */
+void ST77_Screen::begin(void)
+{
+    ptr->startWrite();
+}
+/**
+ * 
+ */
+void ST77_Screen::end(void)
+{
+    ptr->endWrite();
+}
+/**
+ * 
+ */
 void ST77_Screen::blank(void)
 {
    ptr->fillScreen(ST7735_BLACK);
@@ -83,10 +99,16 @@ void ST77_Screen::updateStateCharging(int index, int percent, int amps,int mvolt
     const char *text="Charging";
     ptr->setTextColor(ST7735_BLACK);
     
-    int frontier=((width)*percent)/100;
+    int frontier=((width-4)*percent)/100;
+
+    ptr->fillRoundRect(0, height*index, width-1, height-1,  3, ST7735_BLUE);
+    ptr->drawRoundRect(0, height*index, width-1, height-1,  3, ST7735_WHITE);
+    if(percent>0)
+        ptr->fillRoundRect(1, height*index+1, frontier,height-3,3, ST7735_YELLOW );
+            
     
-    ptr->fillRoundRect(1, height*index, frontier, height-1,3,ST7735_GREEN );
-    ptr->fillRoundRect(frontier+1, height*index, width, height-1,3,ST7735_BLUE );    
+    //ptr->fillRoundRect(1, height*index, frontier, height-1,3,ST7735_GREEN );
+    //ptr->fillRoundRect(frontier+1, height*index, width, height-1,3,ST7735_BLUE );    
 
     
     print(10,height*index+height/2-4,text);
@@ -134,8 +156,8 @@ void ST77_Screen::updateState(int index,ScreenState s)
             text="Waiting";
             break;          
     }
-    ptr->fillRoundRect(2, HEIGHT*index, WIDTH-4, HEIGHT,5,color);
-    print(WIDTH/2-20,HEIGHT*index+HEIGHT/2-10,text);
+    ptr->fillRoundRect(0, height*index, width-1, height-1,  3, color);
+    print(width/2-20,height*index+height/2-10,text);
     return ;
 }
 #if 0

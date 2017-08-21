@@ -23,6 +23,8 @@ public:
                     ST77_Screen();
                     void setup(void);
                     void blank(void);
+                    void begin();
+                    void end();
                     void print(int x,int y, const char *);
                     void updateState(int index,ScreenState s);
                     void updateStateCharging(int index, int percent, int amps,int mvolt);
