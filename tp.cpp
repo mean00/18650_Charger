@@ -1,8 +1,10 @@
 /**
- * 
- * 
+ * Manage one instance of a TP4056
+ * GPL V2.1
+    mean (c) 2017
  * 
  */
+
 #include <Wire.h>
 #include <Adafruit_INA219.h>
 #include <Adafruit_GFX.h>
@@ -82,9 +84,9 @@ void Charger::enableCharge(bool onoff)
 /**
  * 
  */
- Charger::Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin) :  timer(POLLING_PERIOD)
+ Charger::Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin,PowerBudget *bud) :  timer(POLLING_PERIOD)
  {
-     
+    budget=bud;
     index=dex;
     
     lowCurrentCounter=0;
@@ -110,6 +112,7 @@ void Charger::enableCharge(bool onoff)
   */
  void Charger::run(void)
  {
+again:
   float busVoltage = 0;
   float current = 0; // Measure in milli amps
   float power = 0;
@@ -127,18 +130,48 @@ void Charger::enableCharge(bool onoff)
   ScreenState screenState;
   switch(state)
   {
+    case STATE_STARTING:
+        lowCurrentCounter=0;
+        budget->setConsumption(index,1000); // by default we consume one amp
+        state=STATE_CHARGING;    
+        _batteryCurrentVoltage=volt;
+        enableCharge(true);
+        delay(100);
+        goto again;
+        break;
+    case STATE_WAITING:
+        stateName="WAITING";
+        screenState=ScreenState_Waiting;
+        if(batVoltage>2300)
+        {
+            if(budget->askForCurrent(index,1000))
+            {
+                budget->setConsumption(index,1000);
+                state=STATE_STARTING;   
+                goto again;
+            }
+        }else
+        {
+             state=STATE_IDLE;   
+             goto again;
+        }
+        break;
     case STATE_IDLE:
         stateName="IDLE";
         enableCharge(false);
         screenState=ScreenState_Idle;
         if(batVoltage>2300)
         {
-            lowCurrentCounter=0;
-            state=STATE_CHARGING;    
-             _batteryCurrentVoltage=volt;
-            enableCharge(true);
-            delay(100);
-            
+            if(budget->askForCurrent(index,1000))
+            {
+                budget->setConsumption(index,1000);
+                state=STATE_STARTING;   
+                goto again;
+            }else
+            {
+                 state=STATE_WAITING;   
+                 goto again;
+            }
         }
         break;
     case STATE_CHARGING:
@@ -171,16 +204,21 @@ void Charger::enableCharge(bool onoff)
         }else
         {
             lowCurrentCounter=0;
-        }
+        }  
+        budget->setConsumption(index,current); // by default we consume one amp
         if(timer.rdv())
         {
             // Switch off mostfet so we can get a reading
+#ifndef RAW_REFRESH            
             enableCharge(false);
             delay(READ_DELAY);
             _batteryCurrentVoltage = 1000.*sensor219.getBusVoltage_V();
             enableCharge(true);
             timer.reset();
-        }
+#else
+            _batteryCurrentVoltage = 1000.*sensor219.getBusVoltage_V();
+#endif            
+        }     
         break;
     case STATE_CHARGED:
         screenState=ScreenState_Charged;

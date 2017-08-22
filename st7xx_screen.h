@@ -1,4 +1,7 @@
 /**
+ * Simple wrapper on top of u8glib for ST7735 screen
+ * GPL v2.1
+ * (c) mean 2017
  */
 #pragma once
 

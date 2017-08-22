@@ -9,18 +9,22 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7735.h>
 #include <SPI.h>
+#include "powerBudget.h"
 // This is needed
 
 #include "tp.h"
 ST77_Screen screen;
 Charger     *charger;
+PowerBudget  *budget;
 
 /**
  */
 void setup(void) 
 {
   screen.setup();  
-  charger= new Charger(0,&screen,6,A2);
+  budget=new PowerBudget(2000); // 2A budget
+  charger= new Charger(0,&screen,6,A2,budget);
+  
 }
 /**
  */
