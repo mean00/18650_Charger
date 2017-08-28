@@ -12,6 +12,7 @@
 // So we stop for X second every Y seconds
 
 //#define RAW_REFRESH // should we stop charge to measure voltage ?
+                      // to get something interesting, we should
 
 #define READ_DELAY      5000 // ms when we cut off current and measure the battery
 #ifndef RAW_REFRESH

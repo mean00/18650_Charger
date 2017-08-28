@@ -14,7 +14,7 @@
 
 #include "tp.h"
 ST77_Screen screen;
-Charger     *charger;
+Charger     *charger[3];
 PowerBudget  *budget;
 
 /**
@@ -23,7 +23,9 @@ void setup(void)
 {
   screen.setup();  
   budget=new PowerBudget(2000); // 2A budget
-  charger= new Charger(0,&screen,6,A2,budget);
+  charger[0]= new Charger(0,&screen,2,A2,budget);
+  charger[1]= new Charger(1,&screen,3,A3,budget);
+  charger[2]= new Charger(2,&screen,6,A6,budget);
   
 }
 /**
@@ -34,8 +36,8 @@ void setup(void)
  */
 void loop(void) 
 {
-  //screen.blank();
-  charger->run();  
+    for(int i=0;i<3;i++)
+        charger[i]->run();  
   delay(500);
 }
 // EOF
