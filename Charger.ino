@@ -1,6 +1,6 @@
 
 /**
- * Simple TP4056 + INA219 based circuit
+ * Simple TP4056 + INA3221 based circuit
  */
 
 // This is needed for the ino/cmake stuff to work,
@@ -54,7 +54,7 @@ void setup(void)
   Wire.begin();
   ina3221=new SDL_Arduino_INA3221(0x40,0.1); // equipped with 0R100 shunts
   ina3221->begin();
-  budget=new PowerBudget(2000); // 2A budget
+  budget=new PowerBudget(2000); // 2A budget, normal usb power supply
   charger[0]= new Charger(0,&screen,2,A2,budget,new inaSensor(ina3221,1));
   charger[1]= new Charger(1,&screen,3,A3,budget,new inaSensor(ina3221,2));
   charger[2]= new Charger(2,&screen,6,A6,budget,new inaSensor(ina3221,3));
@@ -70,7 +70,7 @@ void loop(void)
 {
     for(int i=0;i<3;i++)
         charger[i]->run();  
-  delay(500);
+    delay(500);
 }
 // EOF
 
