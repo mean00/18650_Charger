@@ -17,6 +17,7 @@ protected:
         int     consumtionPerUnit[AD_MAX_UNIT];
         int     maxConsumption;
         int     totalConsumption;
+
   
 };
 

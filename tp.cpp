@@ -83,15 +83,31 @@ void Charger::enableCharge(bool onoff)
 
 /**
  * 
+ * @return 
  */
- Charger::Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin,PowerBudget *bud) :  timer(POLLING_PERIOD)
+int Charger::getCurrent()
+{
+   return sensor-> getCurrent();
+}
+/**
+ * 
+ * @return 
+ */
+int Charger::getVoltage()
+{
+   return sensor->getVoltage();
+}
+/**
+ * 
+ */
+ Charger::Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin,PowerBudget *bud, CurrentVoltageSensor *s) :  timer(POLLING_PERIOD)
  {
+    sensor=s;
+    
     budget=bud;
     index=dex;
     
-    lowCurrentCounter=0;
-     
-    sensor219.begin();
+    lowCurrentCounter=0;        
     screen=sc;
 
     chargeCommandPin = inChargePin;      // D6 : Charge control, active Low
@@ -117,8 +133,10 @@ again:
   float current = 0; // Measure in milli amps
   float power = 0;
   static int raw=0;
-  busVoltage = sensor219.getBusVoltage_V();
-  current = sensor219.getCurrent_mA();
+   
+  
+  busVoltage = getVoltage();
+  current = getCurrent();
   
   double rawBatVoltage=analogRead(vbatPin);
   rawBatVoltage=(rawBatVoltage*5000.)/1024.;
@@ -162,6 +180,9 @@ again:
         screenState=ScreenState_Idle;
         if(batVoltage>2300)
         {
+            Serial.println();
+            Serial.print(batVoltage);
+            Serial.println();            
             if(budget->askForCurrent(index,1000))
             {
                 budget->setConsumption(index,1000);
@@ -177,14 +198,14 @@ again:
     case STATE_CHARGING:
         stateName="CHARGING";
         screenState=ScreenState_Charging;
-        if(current<9) // maybe disconnect or charge done
+        if(current<12) // maybe disconnect or charge done
         {
             lowCurrentCounter++;
             if(lowCurrentCounter>3)
             {
                 enableCharge(false);
                 delay(300);
-                _batteryCurrentVoltage = 1000.*sensor219.getBusVoltage_V();
+                _batteryCurrentVoltage = getVoltage();
                 if(_batteryCurrentVoltage>4100) // done
                 {
                     screenState=ScreenState_Charged;
@@ -212,7 +233,7 @@ again:
 #ifndef RAW_REFRESH            
             enableCharge(false);
             delay(READ_DELAY);
-            _batteryCurrentVoltage = 1000.*sensor219.getBusVoltage_V();
+            _batteryCurrentVoltage = getVoltage();
             enableCharge(true);
             timer.reset();
 #else

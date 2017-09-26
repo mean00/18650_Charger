@@ -7,6 +7,7 @@
 #include "st7xx_screen.h"
 #include "ad_timer.h"
 #include "powerBudget.h"
+#include "sensor.h"
 
 // From time to time, we stop the charge to get the battery voltage
 // So we stop for X second every Y seconds
@@ -41,17 +42,16 @@ enum State
  * @param intChargingPin  : Input pin, active low to notify the TP4056 is charging 
  * @param inChargeDone    : Input pin, active low to notify the TP4056 charge is done
  */
-
+class SDL_Arduino_INA3221;
 class Charger
 {
 public:
-             Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin,PowerBudget *bud);
+             Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin,PowerBudget *bud, CurrentVoltageSensor *sens);
         void run(void);
 protected:
         
         ST77_Screen         *screen;
         State               state;
-        Adafruit_INA219     sensor219; // Declare and instance of INA219
         Timer               timer;
         int                 chargeCommandPin;      // D6 : Charge control, active Low
         int                 vbatPin         ;     // a2 : vBAT
@@ -61,6 +61,10 @@ protected:
         int                 index;
         int                 lowCurrentCounter;
         PowerBudget         *budget;
+        CurrentVoltageSensor *sensor; 
+protected:
+        int                 getCurrent();
+        int                 getVoltage(); // mA & mV
 };
 
 // EOF
