@@ -1,15 +1,18 @@
 #=============================================================================#
 # cmake arduino cloned from https://github.com/ncasaril/arduino-cmake.git     #
 #=============================================================================#
+cmake_minimum_required(VERSION 2.8)
 set(CMAKE_TOOLCHAIN_FILE cmake/ArduinoToolchain.cmake) # Arduino Toolchain
 
+project(SmartCharger C CXX)
+SET(VERSION 0.2)
 
-cmake_minimum_required(VERSION 2.8)
+#
+#
+include(gitRev.cmake)
 #====================================================================#
 #  Setup Project                                                     #
 #====================================================================#
-project(SmartCharger C CXX)
-SET(VERSION 0.2)
 #
 set(ARDUINO_DEFAULT_BOARD nano)        # Default Board ID, when not specified
 set(ARDUINO_DEFAULT_PORT /dev/ttyUSB0) # Default Port, when not specified
@@ -38,31 +41,7 @@ SET(libPrefix ${ARDUINO_DEFAULT_BOARD}_)
 
 ADD_DEFINITIONS(-DUSING_CMAKE)
 
-# Grab git revision
-FIND_PROGRAM(GIT_EXECUTABLE git
-        DOC "git command line client")
-        MARK_AS_ADVANCED(GIT_EXECUTABLE)
-
-IF(GIT_EXECUTABLE)
-       SET(svn 0)
-       MESSAGE(STATUS "Getting git-svn version from ${CMAKE_SOURCE_DIR}")
-       EXECUTE_PROCESS(
-               COMMAND ${GIT_EXECUTABLE} rev-parse  --show-toplevel ${CMAKE_SOURCE_DIR}
-               WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} 
-               RESULT_VARIABLE result 
-               OUTPUT_VARIABLE topdir
-               )
-       EXECUTE_PROCESS(
-               COMMAND echo  log --format=oneline -1   ${CMAKE_SOURCE_DIR}
-               COMMAND xargs ${GIT_EXECUTABLE} 
-               COMMAND head -c 6
-               WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} 
-               OUTPUT_VARIABLE gitRev
-               )
-ELSE(GIT_EXECUTABLE)
-    SET(gitRev "")
-ENDIF(GIT_EXECUTABLE)
-
+GET_GIT_REV( ${CMAKE_SOURCE_DIR} gitRev)
 CONFIGURE_FILE( ${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_BINARY_DIR}/chargerVersion.h @ONLY)
 include_directories(${CMAKE_BINARY_DIR}) 
 
@@ -70,7 +49,7 @@ include_directories(${CMAKE_BINARY_DIR})
 
 #
 
-generate_arduino_firmware(power_supply 
+generate_arduino_firmware(smartCharger 
                 SKETCH .              # Folder to get the .ino from, must follow DIR_NAME/DIR_NAME.ino patten !
                 LIBS ${libPrefix}Adafruit_INA219 
                 LIBS ${libPrefix}Adafruit_ST7735 
