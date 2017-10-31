@@ -245,7 +245,7 @@ again:
                    screenState=ScreenState_Idle;
                    goToStabilizing();
                 }
-                screen->updateState(index,screenState);
+                screen->updateState(index+1,screenState);
                 return;
             }
         }else
@@ -277,10 +277,10 @@ again:
         break;        
   }
   if(state!=STATE_CHARGING)
-      screen->updateState(index,screenState);
+      screen->updateState(index+1,screenState);
   else
   {
-      screen->updateStateCharging(index,voltageToPercent(_batteryCurrentVoltage),(int)current,_batteryCurrentVoltage);
+      screen->updateStateCharging(index+1,voltageToPercent(_batteryCurrentVoltage),(int)current,_batteryCurrentVoltage);
   }
   
  

@@ -77,8 +77,10 @@ void setup(void)
 void loop(void) 
 {
     screen.blank();
+    screen.begin();
     for(int i=0;i<3;i++)
         charger[i]->run();  
+    screen.end();    
     delay(500);
 }
 // EOF
