@@ -95,6 +95,9 @@ void ST77_Screen::print(int x, int y, const char *s)
 
 void ST77_Screen::updateStateCharging(int index, int percent, int amps,int mvolt)
 {
+#ifdef DEBUG    
+    return;
+#endif    
     int color=ST7735_BLUE;
     const char *text="Charging";
     ptr->setTextColor(ST7735_BLACK);
@@ -128,12 +131,20 @@ void ST77_Screen::updateStateCharging(int index, int percent, int amps,int mvolt
  */
 void ST77_Screen::updateState(int index,ScreenState s)
 {
+#ifdef DEBUG    
+    return;
+#endif
     int color;
     const char *text;
     
     ptr->setTextColor(ST7735_BLACK);
     switch(s)
     {        
+        case ScreenState_Stabilizing:
+#define XX_GREY 0x18
+            color=XX_GREY+(XX_GREY<<5)+(XX_GREY<<10);
+            text="----";
+            break;
         case ScreenState_Idle:
             color=ST7735_WHITE;
             text="Idle";

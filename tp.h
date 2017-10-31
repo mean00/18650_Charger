@@ -16,6 +16,7 @@
                       // to get something interesting, we should
 
 #define READ_DELAY      5000 // ms when we cut off current and measure the battery
+#define STABILIZING_PERIOD 2 // Wait 5 sec for voltage to stabilize
 #ifndef RAW_REFRESH
     #define POLLING_PERIOD  (5*60) // Every 5mn s
 #else
@@ -29,7 +30,8 @@ enum State
     STATE_CHARGED,
     STATE_ERROR,
     STATE_WAITING, // we dont have enough curent budget, WAIT
-    STATE_STARTING
+    STATE_STARTING,
+    STATE_STABILIZING // need to wait a bit for voltage to stabilize
 };
 
 /**
@@ -46,13 +48,15 @@ class SDL_Arduino_INA3221;
 class Charger
 {
 public:
-             Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin,PowerBudget *bud, CurrentVoltageSensor *sens);
-        void run(void);
+                            Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin,PowerBudget *bud, CurrentVoltageSensor *sens);
+        void                run(void);
+        bool                reset(bool resetMe);
 protected:
         
         ST77_Screen         *screen;
         State               state;
         Timer               timer;
+        Timer               stabilizing;
         int                 chargeCommandPin;      // D6 : Charge control, active Low
         int                 vbatPin         ;     // a2 : vBAT
         void                enableCharge(bool onoff);
@@ -65,6 +69,7 @@ protected:
 protected:
         int                 getCurrent();
         int                 getVoltage(); // mA & mV
+        void                goToStabilizing(void);
 };
 
 // EOF

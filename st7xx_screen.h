@@ -17,7 +17,8 @@ enum ScreenState
   ScreenState_Error,
   ScreenState_Charging,
   ScreenState_Charged,
-  ScreenState_Waiting
+  ScreenState_Waiting,
+  ScreenState_Stabilizing
 };
 
 class ST77_Screen

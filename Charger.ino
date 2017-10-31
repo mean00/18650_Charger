@@ -22,6 +22,8 @@ PowerBudget  *budget;
 SDL_Arduino_INA3221 *ina3221;
 
 /**
+ * \class inaSensor
+ * \brief wrapper around one channel of a 3 channels INA3221 circuit
  */
 class inaSensor : public CurrentVoltageSensor
 {
@@ -59,6 +61,12 @@ void setup(void)
   charger[1]= new Charger(1,&screen,3,A3,budget,new inaSensor(ina3221,2));
   charger[2]= new Charger(2,&screen,6,A6,budget,new inaSensor(ina3221,3));
   
+  for(int i=0;i<3;i++) charger[i]->reset(true);
+  delay(1000);
+  for(int i=0;i<3;i++) charger[i]->reset(false);
+  delay(2000); //
+  screen.blank();
+  
 }
 /**
  */
@@ -68,6 +76,7 @@ void setup(void)
  */
 void loop(void) 
 {
+    screen.blank();
     for(int i=0;i<3;i++)
         charger[i]->run();  
     delay(500);

@@ -100,7 +100,8 @@ int Charger::getVoltage()
 /**
  * 
  */
- Charger::Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin,PowerBudget *bud, CurrentVoltageSensor *s) :  timer(POLLING_PERIOD)
+ Charger::Charger(int dex,ST77_Screen *sc, int inChargePin,int inVbaPin,PowerBudget *bud, CurrentVoltageSensor *s) 
+ :  timer(POLLING_PERIOD),stabilizing(STABILIZING_PERIOD)
  {
     sensor=s;
     
@@ -112,18 +113,29 @@ int Charger::getVoltage()
 
     chargeCommandPin = inChargePin;      // D6 : Charge control, active Low
     vbatPin          = inVbaPin;     // a2 : vBAT
-
-    state=STATE_IDLE;
+    
     pinMode(vbatPin,          INPUT);
     pinMode(chargeCommandPin, OUTPUT); // MOSFET command as output
-
-    enableCharge(true); // send a charge pulse to reset the DW01
-    delay(100);
-    enableCharge(false);
-    delay(1000); 
-        
+    
+    goToStabilizing();    
  }
- 
+ /**
+  * 
+  * @param resetMe
+  * @return 
+  */
+ bool Charger::reset(bool resetMe)
+ {
+      enableCharge(resetMe);
+ }
+ /**
+  */
+ void Charger::goToStabilizing(void)
+ {
+     state=STATE_STABILIZING;
+     stabilizing.reset();
+     
+ }
  /**
   */
  void Charger::run(void)
@@ -160,7 +172,7 @@ again:
     case STATE_WAITING:
         stateName="WAITING";
         screenState=ScreenState_Waiting;
-        if(batVoltage>2300)
+        if(batVoltage>2000) // actually ~ 2.5v with the diode
         {
             if(budget->askForCurrent(index,1000))
             {
@@ -178,7 +190,13 @@ again:
         stateName="IDLE";
         enableCharge(false);
         screenState=ScreenState_Idle;
-        if(batVoltage>2300)
+#ifdef DEBUG
+        char xx[20];
+        sprintf(xx,"%d",batVoltage);
+        screen->print(1,20*index,xx);
+        return;
+#endif
+        if(batVoltage>2500)
         {
             Serial.println();
             Serial.print(batVoltage);
@@ -193,6 +211,14 @@ again:
                  state=STATE_WAITING;   
                  goto again;
             }
+        }
+        break;
+    case STATE_STABILIZING:
+        screenState=ScreenState_Stabilizing;
+        if(stabilizing.rdv())
+        {
+            state=STATE_IDLE;
+            goto again;
         }
         break;
     case STATE_CHARGING:
@@ -217,7 +243,7 @@ again:
                    delay(100);
                    enableCharge(false);
                    screenState=ScreenState_Idle;
-                   state=STATE_IDLE;
+                   goToStabilizing();
                 }
                 screen->updateState(index,screenState);
                 return;
