@@ -1,0 +1,2 @@
+#define CHARGER_VERSION "@VERSION@"
+#define CHARGER_VERSION_REV "@gitRev@"

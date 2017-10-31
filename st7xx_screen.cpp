@@ -25,7 +25,7 @@ as well as Adafruit raw 1.8" TFT display
 #include <Adafruit_ST7735.h> // Hardware-specific library
 #include <SPI.h>
 #include "./st7xx_screen.h"
-
+#include "chargerVersion.h"
 // For the breakout, you can use any 2 or 3 pins
 // These pins will also work for the 1.8" TFT shield
 #define TFT_CS     10
@@ -60,9 +60,7 @@ void ST77_Screen::setup(void)
    
    ptr->setTextColor(ST7735_WHITE);
    ptr->setTextSize(0);
-   ptr->println("CHARGER v0.1");
-   ptr->println(width);
-   ptr->println(height);
+   blank();   
    delay(100);
 }
 /**
@@ -70,7 +68,10 @@ void ST77_Screen::setup(void)
  */
 void ST77_Screen::begin(void)
 {
-    ptr->startWrite();
+    ptr->startWrite();  
+    ptr->setTextColor(ST7735_WHITE);
+    print(32,1,"CHARGER "CHARGER_VERSION);
+    print(32,16,CHARGER_VERSION_REV);
 }
 /**
  * 
